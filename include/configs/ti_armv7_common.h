@@ -61,11 +61,21 @@
 #define DEFAULT_MMC_TI_ARGS \
 	"mmcdev=0\0" \
 	"mmcrootfstype=ext4 rootwait\0" \
-	"finduuid=part uuid mmc 0:2 uuid\0" \
+	"finduuid=part uuid mmc ${bootpart} uuid\0" \
 	"args_mmc=run finduuid;setenv bootargs console=${console} " \
 		"${optargs} " \
-		"root=PARTUUID=${uuid} rw " \
-		"rootfstype=${mmcrootfstype}\0"
+		"${cape_disable} " \
+		"${cape_enable} " \
+		"root=PARTUUID=${uuid} ro " \
+		"rootfstype=${mmcrootfstype} " \
+		"${cmdline}\0" \
+	"args_mmc_uuid=setenv bootargs console=${console} " \
+		"${optargs} " \
+		"${cape_disable} " \
+		"${cape_enable} " \
+		"root=UUID=${uuid} ro " \
+		"rootfstype=${mmcrootfstype} " \
+		"${cmdline}\0"
 
 /*
  * Default to a quick boot delay.
