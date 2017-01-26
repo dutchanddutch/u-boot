@@ -34,9 +34,29 @@ static inline int board_is_bone_lt(void)
 	return board_ti_is("A335BNLT");
 }
 
+static inline int board_is_bbbw(void)
+{
+	return board_is_bone_lt() && !strncmp(board_ti_get_rev(), "BW", 2);
+}
+
+static inline int board_is_blue(void)
+{
+	return board_is_bone_lt() && !strncmp(board_ti_get_rev(), "BLA", 3);
+}
+
 static inline int board_is_bbg1(void)
 {
 	return board_is_bone_lt() && !strncmp(board_ti_get_rev(), "BBG1", 4);
+}
+
+static inline int board_is_bone_lt_enhanced(void)
+{
+	return board_is_bone_lt() && !strncmp(board_ti_get_rev(), "SE", 2);
+}
+
+static inline int board_is_m10a(void)
+{
+	return board_is_bone_lt() && !strncmp(board_ti_get_rev(), "M10A", 4);
 }
 
 static inline int board_is_evm_sk(void)
