@@ -208,6 +208,20 @@ typedef struct NS16550 *NS16550_t;
 /* useful defaults for LCR */
 #define UART_LCR_8N1	0x03
 
+/*
+ * These are the definitions for Mode Definition Register 1
+ */
+#if defined(CONFIG_NS16550_C6X)
+#define UART_MDR1_16X		0x00	/* 16x oversampling (default) */
+#define UART_MDR1_13X		0x01	/* 13x oversampling */
+#elif defined(CONFIG_NS16550_OMAP)
+#define UART_MDR1_16X		0x00	/* 16x oversampling */
+#define UART_MDR1_16X_AUTOBAUD	0x02	/* 16x oversampling, auto-baud */
+#define UART_MDR1_13X		0x03	/* 13x oversampling */
+#define UART_MDR1_DISABLE	0x07	/* disable uart (default) */
+/* other values/bits are for infrared modes */
+#endif
+
 void NS16550_init(NS16550_t com_port, int baud_divisor);
 void NS16550_putc(NS16550_t com_port, char c);
 char NS16550_getc(NS16550_t com_port);
