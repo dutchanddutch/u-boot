@@ -31,6 +31,10 @@
 #define CONFIG_SYS_NS16550_REG_SIZE (-1)
 #endif
 
+#if defined(CONFIG_SOC_KEYSTONE) || defined(CONFIG_SOC_DA8XX)
+#define CONFIG_SYS_NS16550_MEM32
+#endif
+
 #if !defined(CONFIG_SYS_NS16550_REG_SIZE) || (CONFIG_SYS_NS16550_REG_SIZE == 0)
 #error "Please define NS16550 registers size."
 #elif defined(CONFIG_SYS_NS16550_MEM32) && !defined(CONFIG_DM_SERIAL)
@@ -71,7 +75,7 @@ struct NS16550 {
 	UART_REG(lsr);		/* 5 */
 	UART_REG(msr);		/* 6 */
 	UART_REG(spr);		/* 7 */
-#ifdef CONFIG_SOC_DA8XX
+#if defined(CONFIG_SOC_KEYSTONE) || defined(CONFIG_SOC_DA8XX)
 	UART_REG(reg8);		/* 8 */
 	UART_REG(reg9);		/* 9 */
 	UART_REG(revid1);	/* A */
