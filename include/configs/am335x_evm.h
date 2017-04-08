@@ -192,9 +192,9 @@
 		"fi; \0" \
 	"init_console=" \
 		"if test $board_name = A335_ICE; then "\
-			"setenv console ttyO3,115200n8;" \
+			"setenv console ttyO3,460800n8;" \
 		"else " \
-			"setenv console ttyO0,115200n8;" \
+			"setenv console ttyO0,460800n8;" \
 		"fi;\0" \
 	EEWIKI_NFS \
 	EEWIKI_BOOT \
@@ -212,7 +212,8 @@
 #define CONFIG_SYS_NS16550_COM4		0x481a6000	/* UART3 */
 #define CONFIG_SYS_NS16550_COM5		0x481a8000	/* UART4 */
 #define CONFIG_SYS_NS16550_COM6		0x481aa000	/* UART5 */
-#define CONFIG_BAUDRATE			115200
+#undef CONFIG_BAUDRATE
+#define CONFIG_BAUDRATE			460800
 
 #define CONFIG_CMD_EEPROM
 #define CONFIG_ENV_EEPROM_IS_ON_I2C
