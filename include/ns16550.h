@@ -23,6 +23,13 @@
 
 #include <linux/types.h>
 
+/* Identify major NS16550 variants */
+#if defined(CONFIG_SOC_KEYSTONE) || defined(CONFIG_SOC_DA8XX)
+#define CONFIG_NS16550_C6X 1
+#elif defined(CONFIG_ARCH_OMAP2PLUS)
+#define CONFIG_NS16550_OMAP 1
+#endif
+
 #ifdef CONFIG_DM_SERIAL
 /*
  * For driver model we always use one byte per register, and sort out the
@@ -31,7 +38,7 @@
 #define CONFIG_SYS_NS16550_REG_SIZE (-1)
 #endif
 
-#if defined(CONFIG_SOC_KEYSTONE) || defined(CONFIG_SOC_DA8XX)
+#if defined(CONFIG_NS16550_C6X)
 #define CONFIG_SYS_NS16550_MEM32
 #endif
 
@@ -75,14 +82,14 @@ struct NS16550 {
 	UART_REG(lsr);		/* 5 */
 	UART_REG(msr);		/* 6 */
 	UART_REG(spr);		/* 7 */
-#if defined(CONFIG_SOC_KEYSTONE) || defined(CONFIG_SOC_DA8XX)
+#if defined(CONFIG_NS16550_C6X)
 	UART_REG(reg8);		/* 8 */
 	UART_REG(reg9);		/* 9 */
 	UART_REG(revid1);	/* A */
 	UART_REG(revid2);	/* B */
 	UART_REG(pwr_mgmt);	/* C */
 	UART_REG(mdr1);		/* D */
-#else
+#elif defined(CONFIG_NS16550_OMAP)
 	UART_REG(mdr1);		/* 8 */
 	UART_REG(reg9);		/* 9 */
 	UART_REG(regA);		/* A */
