@@ -170,7 +170,7 @@ void NS16550_init(NS16550_t com_port, int baud_divisor)
 	     == UART_LSR_THRE) {
 		if (baud_divisor != -1)
 			NS16550_setbrg(com_port, baud_divisor);
-		serial_out(0, &com_port->mdr1);
+		serial_out(UART_MDR1_16X, &com_port->mdr1);
 	}
 #endif
 
@@ -179,7 +179,7 @@ void NS16550_init(NS16550_t com_port, int baud_divisor)
 
 	serial_out(CONFIG_SYS_NS16550_IER, &com_port->ier);
 #ifdef CONFIG_NS16550_OMAP
-	serial_out(0x7, &com_port->mdr1);	/* mode select reset TL16C750*/
+	serial_out(UART_MDR1_DISABLE, &com_port->mdr1);
 #endif
 	serial_out(UART_MCRVAL, &com_port->mcr);
 	serial_out(ns16550_getfcr(com_port), &com_port->fcr);
@@ -187,7 +187,7 @@ void NS16550_init(NS16550_t com_port, int baud_divisor)
 		NS16550_setbrg(com_port, baud_divisor);
 #ifdef CONFIG_NS16550_OMAP
 	/* /16 is proper to hit 115200 with 48MHz */
-	serial_out(0, &com_port->mdr1);
+	serial_out(UART_MDR1_16X, &com_port->mdr1);
 #endif
 #ifdef CONFIG_NS16550_C6X
 	serial_out(UART_REG_VAL_PWREMU_MGMT_UART_ENABLE, &com_port->regC);
