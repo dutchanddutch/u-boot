@@ -140,7 +140,11 @@ static u32 ns16550_getfcr(NS16550_t port)
 
 int ns16550_calc_divisor(NS16550_t port, int clock, int baudrate)
 {
+#ifdef UART_MDR1_13X
+	const unsigned int mode_x_div = 13;
+#else
 	const unsigned int mode_x_div = 16;
+#endif
 
 	return DIV_ROUND_CLOSEST(clock, mode_x_div * baudrate);
 }
@@ -181,9 +185,9 @@ void NS16550_init(NS16550_t com_port, int baud_divisor)
 	serial_out(ns16550_getfcr(com_port), &com_port->fcr);
 	if (baud_divisor != -1)
 		NS16550_setbrg(com_port, baud_divisor);
-#ifdef CONFIG_NS16550_OMAP
-	/* /16 is proper to hit 115200 with 48MHz */
-	serial_out(UART_MDR1_16X, &com_port->mdr1);
+#ifdef UART_MDR1_13X
+	/* /13 is proper to hit 115200*{1,2,4,8,16,32} with 48MHz */
+	serial_out(UART_MDR1_13X, &com_port->mdr1);
 #endif
 #ifdef CONFIG_NS16550_C6X
 	serial_out(UART_REG_VAL_PWREMU_MGMT_UART_ENABLE, &com_port->pwr_mgmt);
@@ -297,7 +301,7 @@ static inline void _debug_uart_init(void)
 	serial_dout(&com_port->dll, baud_divisor & 0xff);
 	serial_dout(&com_port->dlm, (baud_divisor >> 8) & 0xff);
 	serial_dout(&com_port->lcr, UART_LCRVAL);
-	serial_dout(&com_port->mdr1, UART_MDR1_16X);
+	serial_dout(&com_port->mdr1, UART_MDR1_13X);
 }
 
 static inline void _debug_uart_putc(int ch)
