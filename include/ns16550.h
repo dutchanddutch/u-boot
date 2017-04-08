@@ -71,7 +71,7 @@ struct NS16550 {
 	UART_REG(lsr);		/* 5 */
 	UART_REG(msr);		/* 6 */
 	UART_REG(spr);		/* 7 */
-#ifdef CONFIG_SOC_DA8XX
+#if defined(CONFIG_SOC_KEYSTONE) || defined(CONFIG_SOC_DA8XX)
 	UART_REG(reg8);		/* 8 */
 	UART_REG(reg9);		/* 9 */
 	UART_REG(revid1);	/* A */

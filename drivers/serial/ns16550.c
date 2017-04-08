@@ -36,7 +36,7 @@ DECLARE_GLOBAL_DATA_PTR;
 #endif
 #endif /* !CONFIG_DM_SERIAL */
 
-#if defined(CONFIG_SOC_KEYSTONE)
+#if defined(CONFIG_SOC_KEYSTONE) || defined(CONFIG_SOC_DA8XX)
 #define UART_REG_VAL_PWREMU_MGMT_UART_DISABLE   0
 #define UART_REG_VAL_PWREMU_MGMT_UART_ENABLE ((1 << 14) | (1 << 13) | (1 << 0))
 #undef UART_MCRVAL
@@ -181,12 +181,12 @@ void NS16550_init(NS16550_t com_port, int baud_divisor)
 	serial_out(ns16550_getfcr(com_port), &com_port->fcr);
 	if (baud_divisor != -1)
 		NS16550_setbrg(com_port, baud_divisor);
-#if defined(CONFIG_ARCH_OMAP2PLUS) || defined(CONFIG_SOC_DA8XX)
+#if defined(CONFIG_ARCH_OMAP2PLUS)
 	/* /16 is proper to hit 115200 with 48MHz */
 	serial_out(0, &com_port->mdr1);
 #endif
-#if defined(CONFIG_SOC_KEYSTONE)
-	serial_out(UART_REG_VAL_PWREMU_MGMT_UART_ENABLE, &com_port->regC);
+#if defined(CONFIG_SOC_KEYSTONE) || defined(CONFIG_SOC_DA8XX)
+	serial_out(UART_REG_VAL_PWREMU_MGMT_UART_ENABLE, &com_port->pwr_mgmt);
 #endif
 }
 
