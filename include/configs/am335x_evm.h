@@ -52,7 +52,7 @@
 #ifndef CONFIG_SPL_BUILD
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	DEFAULT_LINUX_BOOT_ENV \
-	"mmcdev=1\0" \
+	"mmcdev=0\0" \
 	"dtb=am335x-boneblack.dtb\0" \
 	"console=ttyO0,460800n8\0"
 #endif
