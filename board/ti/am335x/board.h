@@ -26,27 +26,27 @@
 
 static inline int board_is_bone(void)
 {
-	return board_ti_is("A335BONE");
+	return false && board_ti_is("A335BONE");
 }
 
 static inline int board_is_bone_lt(void)
 {
-	return board_ti_is("A335BNLT");
+	return true || board_ti_is("A335BNLT");
 }
 
 static inline int board_is_bbbw(void)
 {
-	return board_is_bone_lt() && !strncmp(board_ti_get_rev(), "BW", 2);
+	return false && board_is_bone_lt() && !strncmp(board_ti_get_rev(), "BW", 2);
 }
 
 static inline int board_is_blue(void)
 {
-	return board_is_bone_lt() && !strncmp(board_ti_get_rev(), "BLA", 3);
+	return false && board_is_bone_lt() && !strncmp(board_ti_get_rev(), "BLA", 3);
 }
 
 static inline int board_is_bbg1(void)
 {
-	return board_is_bone_lt() && !strncmp(board_ti_get_rev(), "BBG1", 4);
+	return false && board_is_bone_lt() && !strncmp(board_ti_get_rev(), "BBG1", 4);
 }
 
 static inline int board_is_bone_lt_enhanced(void)
@@ -56,33 +56,33 @@ static inline int board_is_bone_lt_enhanced(void)
 
 static inline int board_is_m10a(void)
 {
-	return board_is_bone_lt() && !strncmp(board_ti_get_rev(), "M10A", 4);
+	return false && board_is_bone_lt() && !strncmp(board_ti_get_rev(), "M10A", 4);
 }
 
 static inline int board_is_evm_sk(void)
 {
-	return board_ti_is("A335X_SK");
+	return false && board_ti_is("A335X_SK");
 }
 
 static inline int board_is_idk(void)
 {
-	return !strncmp(board_ti_get_config(), "SKU#02", 6);
+	return false && !strncmp(board_ti_get_config(), "SKU#02", 6);
 }
 
 static inline int board_is_gp_evm(void)
 {
-	return board_ti_is("A33515BB");
+	return false && board_ti_is("A33515BB");
 }
 
 static inline int board_is_evm_15_or_later(void)
 {
-	return (board_is_gp_evm() &&
+	return false && (board_is_gp_evm() &&
 		strncmp("1.5", board_ti_get_rev(), 3) <= 0);
 }
 
 static inline int board_is_icev2(void)
 {
-	return board_ti_is("A335_ICE") && !strncmp("2", board_ti_get_rev(), 1);
+	return false && board_ti_is("A335_ICE") && !strncmp("2", board_ti_get_rev(), 1);
 }
 
 /*

@@ -20,12 +20,13 @@
 #include <asm/arch/omap.h>
 
 /* NS16550 Configuration */
-#ifdef CONFIG_SPL_BUILD
+#ifndef CONFIG_DM_SERIAL
 #define CONFIG_SYS_NS16550_SERIAL
 #define CONFIG_SYS_NS16550_REG_SIZE	(-4)
 #endif
 #define CONFIG_SYS_NS16550_CLK		48000000
 
+#ifdef CONFIG_NET
 #ifndef CONFIG_SPL_BUILD
 /* Network defines. */
 #define CONFIG_BOOTP_DNS		/* Configurable parts of CMD_DHCP */
@@ -38,6 +39,8 @@
 #endif
 
 #define CONFIG_DRIVER_TI_CPSW		/* Driver for IP block */
+#endif
+
 /*
  * RTC related defines. To use bootcount you must set bootlimit in the
  * environment to a non-zero value and enable CONFIG_BOOTCOUNT_LIMIT
@@ -46,8 +49,10 @@
 #define CONFIG_SYS_BOOTCOUNT_ADDR	0x44E3E000
 
 /* Enable the HW watchdog, since we can use this with bootcount */
+#ifdef CONFIG_SPL_WATCHDOG_SUPPORT
 #define CONFIG_HW_WATCHDOG
 #define CONFIG_OMAP_WATCHDOG
+#endif
 
 /*
  * SPL related defines.  The Public RAM memory map the ROM defines the
@@ -66,7 +71,7 @@
  * Since SPL did pll and ddr initialization for us,
  * we don't need to do it twice.
  */
-#if !defined(CONFIG_SPL_BUILD) && !defined(CONFIG_NOR_BOOT)
+#if defined(CONFIG_SPL) && !defined(CONFIG_SPL_BUILD)
 #define CONFIG_SKIP_LOWLEVEL_INIT
 #endif
 

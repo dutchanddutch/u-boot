@@ -21,12 +21,7 @@
  * We typically do not contain NOR flash.  In the cases where we do, we
  * undefine this later.
  */
-#define CONFIG_SYS_NO_FLASH
-
-/* Support both device trees and ATAGs. */
-#define CONFIG_CMDLINE_TAG
-#define CONFIG_SETUP_MEMORY_TAGS
-#define CONFIG_INITRD_TAG
+#define CONFIG_SYS_NO_FLASH 1
 
 /*
  * Our DDR memory always starts at 0x80000000 and U-Boot shall have
@@ -430,9 +425,6 @@
 /* MMC/SD IP block */
 #define CONFIG_GENERIC_MMC
 
-/* McSPI IP block */
-#define CONFIG_SPI
-
 /* GPIO block */
 
 /*
@@ -453,11 +445,6 @@
 #define CONFIG_SYS_BAUDRATE_TABLE	{ 9600, 19200, 38400, 57600, 115200, \
 			230400, 460800, 921600, 1843200, 3686400 }
 #endif
-
-/* As stated above, the following choices are optional. */
-#define CONFIG_SYS_LONGHELP
-#define CONFIG_AUTO_COMPLETE
-#define CONFIG_CMDLINE_EDITING
 
 /* We set the max number of command args high to avoid HUSH bugs. */
 #define CONFIG_SYS_MAXARGS		64
@@ -480,17 +467,13 @@
 #define CONFIG_CMD_MTDPARTS
 #endif
 
-#define CONFIG_SUPPORT_RAW_INITRD
-
 /*
  * Common filesystems support.  When we have removable storage we
  * enabled a number of useful commands and support.
  */
 #if defined(CONFIG_MMC) || defined(CONFIG_USB_STORAGE)
 #define CONFIG_DOS_PARTITION
-#define CONFIG_FAT_WRITE
-#define CONFIG_PARTITION_UUIDS
-#define CONFIG_CMD_PART
+#define CONFIG_FS_EXT4
 #endif
 
 /*
@@ -499,7 +482,7 @@
  * SPL framework found under common/spl/.  Given our generally common memory
  * map, we set a number of related defaults and sizes here.
  */
-#if !defined(CONFIG_NOR_BOOT) && \
+#if defined(CONFIG_SPL) && \
 	!(defined(CONFIG_QSPI_BOOT) && defined(CONFIG_AM43XX))
 #define CONFIG_SPL_FRAMEWORK
 
@@ -538,10 +521,6 @@
 #endif
 
 
-/* FAT sd card locations. */
-#define CONFIG_SYS_MMCSD_FS_BOOT_PARTITION	1
-#define CONFIG_SPL_FS_LOAD_PAYLOAD_NAME	"u-boot.img"
-
 #ifdef CONFIG_SPL_OS_BOOT
 /* FAT */
 #define CONFIG_SPL_FS_LOAD_KERNEL_NAME		"uImage"
@@ -551,9 +530,6 @@
 #define CONFIG_SYS_MMCSD_RAW_MODE_KERNEL_SECTOR	0x900	/* address 0x120000 */
 #define CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTOR	0x80	/* address 0x10000 */
 #define CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTORS	0x80	/* 64KiB */
-
-/* spl export command */
-#define CONFIG_CMD_SPL
 #endif
 
 #define CONFIG_SYS_THUMB_BUILD
@@ -594,7 +570,5 @@
 #else
 #define NETARGS ""
 #endif
-
-#include <config_distro_defaults.h>
 
 #endif	/* __CONFIG_TI_ARMV7_COMMON_H__ */

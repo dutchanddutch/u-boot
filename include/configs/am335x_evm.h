@@ -17,19 +17,18 @@
 #define __CONFIG_AM335X_EVM_H
 
 #include <configs/ti_am335x_common.h>
+#ifdef CONFIG_CMD_DFU
 #include <environment/ti/dfu.h>
-#define CONFIG_ENV_IS_NOWHERE
-
-#ifndef CONFIG_SPL_BUILD
-# define CONFIG_TIMESTAMP
-# define CONFIG_LZO
 #endif
+#define CONFIG_ENV_IS_NOWHERE
 
 #define CONFIG_SYS_BOOTM_LEN		(16 << 20)
 
 #define MACH_TYPE_TIAM335EVM		3589	/* Until the next sync */
 #define CONFIG_MACH_TYPE		MACH_TYPE_TIAM335EVM
+#ifdef CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
 #define CONFIG_BOARD_LATE_INIT
+#endif
 
 /* Clock Defines */
 #define V_OSCK				24000000  /* Clock output from T2 */
@@ -41,198 +40,36 @@
 /* Always 128 KiB env size */
 #define CONFIG_ENV_SIZE			(128 << 10)
 
-/* Enhance our eMMC support / experience. */
-#define CONFIG_CMD_GPT
-#define CONFIG_EFI_PARTITION
-
-#ifdef CONFIG_NAND
-#define NANDARGS \
-	"mtdids=" MTDIDS_DEFAULT "\0" \
-	"mtdparts=" MTDPARTS_DEFAULT "\0" \
-	"nandargs=setenv bootargs console=${console} " \
-		"${optargs} " \
-		"root=${nandroot} " \
-		"rootfstype=${nandrootfstype}\0" \
-	"nandroot=ubi0:rootfs rw ubi.mtd=NAND.file-system,2048\0" \
-	"nandrootfstype=ubifs rootwait=1\0" \
-	"nandboot=echo Booting from nand ...; " \
-		"run nandargs; " \
-		"nand read ${fdtaddr} NAND.u-boot-spl-os; " \
-		"nand read ${loadaddr} NAND.kernel; " \
-		"bootz ${loadaddr} - ${fdtaddr}\0"
-#else
-#define NANDARGS ""
-#endif
-
-#define CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
-
-#define BOOTENV_DEV_LEGACY_MMC(devtypeu, devtypel, instance) \
-	"bootcmd_" #devtypel #instance "=" \
-	"gpio clear 56; " \
-	"gpio clear 55; " \
-	"gpio clear 54; " \
-	"gpio set 53; " \
-	"setenv devtype mmc; " \
-	"setenv mmcdev " #instance"; "\
-	"setenv bootpart " #instance":1 ; "\
-	"run boot\0"
-
-#define BOOTENV_DEV_NAME_LEGACY_MMC(devtypeu, devtypel, instance) \
-	#devtypel #instance " "
-
-#define BOOTENV_DEV_NAND(devtypeu, devtypel, instance) \
-	"bootcmd_" #devtypel "=" \
-	"run nandboot\0"
-
-#define BOOTENV_DEV_NAME_NAND(devtypeu, devtypel, instance) \
-	#devtypel #instance " "
-
-#define BOOT_TARGET_DEVICES(func) \
-	func(MMC, mmc, 0) \
-	func(LEGACY_MMC, legacy_mmc, 0) \
-	func(MMC, mmc, 1) \
-	func(LEGACY_MMC, legacy_mmc, 1) \
-	func(PXE, pxe, na) \
-	func(DHCP, dhcp, na)
-
 #define CONFIG_BOOTCOMMAND \
-	"if test ${boot_fit} -eq 1; then "	\
-		"run update_to_fit;"	\
-	"fi;"	\
-	"run findfdt; " \
-	"run init_console; " \
-	"run envboot; " \
-	"run distro_bootcmd"
-
-#include <config_distro_bootcmd.h>
+	"load mmc ${mmcdev}:1 ${loadaddr} /boot/uEnv.txt;" \
+	"env import -t ${loadaddr} ${filesize};" \
+	"load mmc ${mmcdev}:1 ${loadaddr} /boot/vmlinuz-${uname_r};" \
+	"load mmc ${mmcdev}:1 ${fdtaddr} /boot/dtbs/${uname_r}/${dtb};" \
+	"load mmc ${mmcdev}:1 ${fdtaddr} /boot/dtbs/${dtb};" \
+	"setenv bootargs console=${console} root=/dev/mmcblk${mmcdev}p1 ro rootfstype=ext4 rootwait ${cmdline};" \
+	"bootz ${loadaddr} - ${fdtaddr}"
 
 #ifndef CONFIG_SPL_BUILD
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	DEFAULT_LINUX_BOOT_ENV \
-	DEFAULT_MMC_TI_ARGS \
-	DEFAULT_FIT_TI_ARGS \
-	"bootpart=0:2\0" \
-	"bootdir=/boot\0" \
-	"bootfile=zImage\0" \
-	"fdtfile=undefined\0" \
-	"console=ttyO0,115200n8\0" \
-	"partitions=" \
-		"uuid_disk=${uuid_gpt_disk};" \
-		"name=rootfs,start=2MiB,size=-,uuid=${uuid_gpt_rootfs}\0" \
-	"optargs=\0" \
-	"ramroot=/dev/ram0 rw\0" \
-	"ramrootfstype=ext2\0" \
-	"spiroot=/dev/mtdblock4 rw\0" \
-	"spirootfstype=jffs2\0" \
-	"spisrcaddr=0xe0000\0" \
-	"spiimgsize=0x362000\0" \
-	"spibusno=0\0" \
-	"spiargs=setenv bootargs console=${console} " \
-		"${optargs} " \
-		"root=${spiroot} " \
-		"rootfstype=${spirootfstype}\0" \
-	"ramargs=setenv bootargs console=${console} " \
-		"${optargs} " \
-		"root=${ramroot} " \
-		"rootfstype=${ramrootfstype}\0" \
-	"loadramdisk=load mmc ${mmcdev} ${rdaddr} ramdisk.gz\0" \
-	"spiboot=echo Booting from spi ...; " \
-		"run spiargs; " \
-		"sf probe ${spibusno}:0; " \
-		"sf read ${loadaddr} ${spisrcaddr} ${spiimgsize}; " \
-		"bootz ${loadaddr}\0" \
-	"ramboot=echo Booting from ramdisk ...; " \
-		"run ramargs; " \
-		"bootz ${loadaddr} ${rdaddr} ${fdtaddr}\0" \
-	"findfdt="\
-		"echo board_name=[$board_name] ...; " \
-		"if test $board_name = A335BONE; then " \
-			"setenv fdtfile am335x-bone.dtb; setenv fdtbase am335x-bone; fi; " \
-		"if test $board_name = A335BNLT; then " \
-			"echo board_rev=[$board_rev] ...; " \
-			"if test $board_rev = GH01; then " \
-				"setenv fdtfile am335x-boneblack.dtb; setenv fdtbase am335x-boneblack; " \
-			"elif test $board_rev = BBG1; then " \
-				"setenv fdtfile am335x-bonegreen.dtb; setenv fdtbase am335x-bonegreen; " \
-			"elif test $board_rev = GW1A; then " \
-				"setenv fdtfile am335x-bonegreen-wireless.dtb; setenv fdtbase am335x-bonegreen-wireless; " \
-			"elif test $board_rev = AIA0; then " \
-				"setenv fdtfile am335x-abbbi.dtb; setenv fdtbase am335x-abbbi; " \
-			"elif test $board_rev = EIA0; then " \
-				"setenv fdtfile am335x-boneblack.dtb; setenv fdtbase am335x-boneblack; " \
-			"elif test $board_rev = SE0A; then " \
-				"setenv fdtfile am335x-sancloud-bbe.dtb; setenv fdtbase am335x-sancloud-bbe; " \
-			"elif test $board_rev = ME06; then " \
-				"setenv fdtfile am335x-bonegreen.dtb; setenv fdtbase am335x-bonegreen; " \
-			"elif test $board_rev = M10A; then " \
-				"setenv fdtfile am335x-vsc8531bbb.dtb; setenv fdtbase am335x-vsc8531bbb; " \
-			"else " \
-				"setenv fdtfile am335x-boneblack.dtb; setenv fdtbase am335x-boneblack; " \
-			"fi; " \
-		"fi; " \
-		"if test $board_name = BBG1; then " \
-			"setenv fdtfile am335x-bonegreen.dtb; setenv fdtbase am335x-bonegreen; fi; " \
-		"if test $board_name = BBBW; then " \
-			"setenv fdtfile am335x-boneblack-wireless.dtb; setenv fdtbase am335x-boneblack-wireless; fi; " \
-		"if test $board_name = BBBL; then " \
-			"setenv fdtfile am335x-boneblue.dtb; setenv fdtbase am335x-boneblue; fi; " \
-		"if test $board_name = SBBE; then " \
-			"setenv fdtfile am335x-sancloud-bbe.dtb; setenv fdtbase am335x-sancloud-bbe; fi; " \
-		"if test $board_name = A33515BB; then " \
-			"setenv fdtfile am335x-evm.dtb; fi; " \
-		"if test $board_name = A335X_SK; then " \
-			"setenv fdtfile am335x-evmsk.dtb; fi; " \
-		"if test $board_name = A335_ICE; then " \
-			"setenv fdtfile am335x-icev2.dtb; fi; " \
-		"if test $fdtfile = undefined; then " \
-			"setenv board_name A335BNLT; " \
-			"setenv board_rev EMMC; " \
-			"setenv fdtbase am335x-boneblack-emmc-overlay; " \
-			"setenv fdtfile am335x-boneblack-emmc-overlay.dtb; " \
-		"fi; \0" \
-	"init_console=" \
-		"if test $board_name = A335_ICE; then "\
-			"setenv console ttyO3,460800n8;" \
-		"else " \
-			"setenv console ttyO0,460800n8;" \
-		"fi;\0" \
-	EEWIKI_NFS \
-	EEWIKI_BOOT \
-	EEWIKI_UNAME_BOOT \
-	NANDARGS \
-	NETARGS \
-	DFUARGS \
-	BOOTENV
+	"mmcdev=1\0" \
+	"dtb=am335x-boneblack.dtb\0" \
+	"console=ttyO0,460800n8\0"
 #endif
 
 /* NS16550 Configuration */
 #define CONFIG_SYS_NS16550_COM1		0x44e09000	/* Base EVM has UART0 */
-#define CONFIG_SYS_NS16550_COM2		0x48022000	/* UART1 */
-#define CONFIG_SYS_NS16550_COM3		0x48024000	/* UART2 */
-#define CONFIG_SYS_NS16550_COM4		0x481a6000	/* UART3 */
-#define CONFIG_SYS_NS16550_COM5		0x481a8000	/* UART4 */
-#define CONFIG_SYS_NS16550_COM6		0x481aa000	/* UART5 */
 #undef CONFIG_BAUDRATE
 #define CONFIG_BAUDRATE			460800
 
-#define CONFIG_CMD_EEPROM
-#define CONFIG_ENV_EEPROM_IS_ON_I2C
 #define CONFIG_SYS_I2C_EEPROM_ADDR	0x50	/* Main EEPROM */
 #define CONFIG_SYS_I2C_EEPROM_ADDR_LEN	2
 
 /* PMIC support */
 #define CONFIG_POWER_TPS65217
-#define CONFIG_POWER_TPS65910
 
 /* SPL */
-#ifndef CONFIG_NOR_BOOT
-/* Bootcount using the RTC block */
-#define CONFIG_BOOTCOUNT_LIMIT
-#define CONFIG_BOOTCOUNT_AM33XX
-#define CONFIG_SYS_BOOTCOUNT_BE
-
-/* USB gadget RNDIS */
-
+#ifdef CONFIG_SPL
 #define CONFIG_SPL_LDSCRIPT		"arch/arm/mach-omap2/am33xx/u-boot-spl.lds"
 #endif
 
@@ -300,6 +137,7 @@
  * add mass storage support and for gadget we add both RNDIS ethernet
  * and DFU.
  */
+#ifdef CONFIG_USB
 #define CONFIG_USB_MUSB_DSPS
 #define CONFIG_ARCH_MISC_INIT
 #define CONFIG_USB_MUSB_PIO_ONLY
@@ -323,6 +161,7 @@
 #ifdef CONFIG_USB_MUSB_GADGET
 #define CONFIG_USB_FUNCTION_MASS_STORAGE
 #endif /* CONFIG_USB_MUSB_GADGET */
+#endif /* CONFIG_USB */
 
 /*
  * Disable MMC DM for SPL build and can be re-enabled after adding
@@ -353,6 +192,7 @@
 	DFU_ALT_INFO_NAND
 #endif
 
+#ifndef CONFIG_ENV_IS_NOWHERE
 /*
  * Default to using SPI for environment, etc.
  * 0x000000 - 0x020000 : SPL (128KiB)
@@ -379,7 +219,7 @@
 					"128k(u-boot-env2),3464k(kernel)," \
 					"-(rootfs)"
 #elif defined(CONFIG_EMMC_BOOT)
-#define CONFIG_ENV_IS_IN_MMC
+#define CONFIG_ENV_IS_NOWHERE
 #define CONFIG_SYS_MMC_ENV_DEV		1
 #define CONFIG_SYS_MMC_ENV_PART		2
 #define CONFIG_ENV_OFFSET		0x0
@@ -400,23 +240,26 @@
 #define CONFIG_ENV_OFFSET		0x001c0000
 #define CONFIG_ENV_OFFSET_REDUND	0x001e0000
 #define CONFIG_SYS_ENV_SECT_SIZE	CONFIG_SYS_NAND_BLOCK_SIZE
-#elif !defined(CONFIG_ENV_IS_NOWHERE)
+#else
 /* Not NAND, SPI, NOR or eMMC env, so put ENV in a file on FAT */
 #define CONFIG_ENV_IS_IN_FAT
 #define FAT_ENV_INTERFACE		"mmc"
 #define FAT_ENV_DEVICE_AND_PART		"0:1"
 #define FAT_ENV_FILE			"uboot.env"
 #endif
+#endif /* CONFIG_ENV_IS_NOWHERE */
 
 /* SPI flash. */
 #define CONFIG_SF_DEFAULT_SPEED		24000000
 
+#ifdef CONFIG_NET
 /* Network. */
 #define CONFIG_PHY_GIGE
 #define CONFIG_PHYLIB
 #define CONFIG_PHY_SMSC
 /* Enable Atheros phy driver */
 #define CONFIG_PHY_ATHEROS
+#endif
 
 /*
  * NOR Size = 16 MiB
