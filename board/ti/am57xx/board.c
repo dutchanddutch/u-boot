@@ -37,12 +37,30 @@
 #define board_is_x15()		board_ti_is("BBRDX15_")
 #define board_is_x15_revb1()	(board_ti_is("BBRDX15_") && \
 				 (strncmp("B.10", board_ti_get_rev(), 3) <= 0))
+#define board_is_x15_revc()	(board_ti_is("BBRDX15_") && \
+				 (strncmp("C.00", board_ti_get_rev(), 3) <= 0))
 #define board_is_am572x_evm()	board_ti_is("AM572PM_")
 #define board_is_am572x_evm_reva3()	\
 				(board_ti_is("AM572PM_") && \
 				 (strncmp("A.30", board_ti_get_rev(), 3) <= 0))
 #define board_is_am572x_idk()	board_ti_is("AM572IDK")
 #define board_is_am571x_idk()	board_ti_is("AM571IDK")
+#define board_is_am571x_sndrblock()	board_ti_is("AM571SBA")
+
+//Blank Flasher
+//#define board_is_x15_revb1_blank()	1
+//Normal
+#define board_is_x15_revb1_blank()	board_ti_is("XM57BLNK")
+
+//Blank Flasher
+//#define board_is_x15_revc_blank()	1
+//Normal
+#define board_is_x15_revc_blank()	board_ti_is("XM57BLNK")
+
+//Blank Flasher
+//#define board_is_am571x_blank()		1
+//Normal
+#define board_is_am571x_blank()		board_ti_is("XM57BLNK")
 
 #ifdef CONFIG_DRIVER_TI_CPSW
 #include <cpsw.h>
@@ -88,7 +106,7 @@ static const struct dmm_lisa_map_regs am571x_idk_lisa_regs = {
 
 void emif_get_dmm_regs(const struct dmm_lisa_map_regs **dmm_lisa_regs)
 {
-	if (board_is_am571x_idk())
+	if (board_is_am571x_idk() || board_is_am571x_sndrblock() || board_is_am571x_blank())
 		*dmm_lisa_regs = &am571x_idk_lisa_regs;
 	else
 		*dmm_lisa_regs = &beagle_x15_lisa_regs;
@@ -407,6 +425,14 @@ void do_board_detect(void)
 		bname = "AM572x IDK";
 	else if (board_is_am571x_idk())
 		bname = "AM571x IDK";
+	else if (board_is_am571x_sndrblock())
+		bname = "AM571x sndrblock";
+	else if (board_is_x15_revb1_blank())
+		bname = "BeagleBoard X15 blank";
+	else if (board_is_x15_revc_blank())
+		bname = "BeagleBoard X15 blank";
+	else if (board_is_am571x_blank())
+		bname = "AM571x sndrblock blank";
 
 	if (bname)
 		snprintf(sysinfo.board_string, SYSINFO_BOARD_NAME_MAX_LEN,
@@ -415,16 +441,18 @@ void do_board_detect(void)
 
 static void setup_board_eeprom_env(void)
 {
-	char *name = "beagle_x15";
+	char *name = "NULL";
 	int rc;
 
 	rc = ti_i2c_eeprom_am_get(CONFIG_EEPROM_BUS_ADDRESS,
 				  CONFIG_EEPROM_CHIP_ADDRESS);
 	if (rc)
-		goto invalid_eeprom;
+		printf("ti_i2c_eeprom_init failed %d\n", rc);
 
 	if (board_is_x15()) {
-		if (board_is_x15_revb1())
+		if (board_is_x15_revc())
+			name = "beagle_x15_revc";
+		else if (board_is_x15_revb1())
 			name = "beagle_x15_revb1";
 		else
 			name = "beagle_x15";
@@ -437,12 +465,20 @@ static void setup_board_eeprom_env(void)
 		name = "am572x_idk";
 	} else if (board_is_am571x_idk()) {
 		name = "am571x_idk";
-	} else {
-		printf("Unidentified board claims %s in eeprom header\n",
-		       board_ti_get_name());
+	} else if (board_is_am571x_sndrblock()) {
+		name = "am571x_sndrblock";
+	} else if (board_is_x15_revb1_blank()) {
+		name = "beagle_x15_revb1_blank";
+		setenv("board_eeprom_header", "beagle_x15_revb1_blank");
+	} else if (board_is_x15_revc_blank()) {
+		name = "beagle_x15_revc_blank";
+		setenv("board_eeprom_header", "beagle_x15_revc_blank");
+	} else if (board_is_am571x_blank()) {
+		name = "am571x_sndrblock_blank";
+		setenv("board_eeprom_header", "am571x_sndrblock_blank");
 	}
 
-invalid_eeprom:
+	printf("setup_board_eeprom_env: %s\n", name);
 	set_board_info_env(name);
 }
 
@@ -494,6 +530,15 @@ void am57x_idk_lcd_detect(void)
 
 	/* Only valid for IDKs */
 	if (board_is_x15() || board_is_am572x_evm())
+		return;
+
+	if (board_is_x15_revb1_blank())
+		return;
+
+	if (board_is_x15_revc_blank())
+		return;
+
+	if (board_is_am571x_sndrblock() || board_is_am571x_blank())
 		return;
 
 	/* Only AM571x IDK has gpio control detect.. so check that */
@@ -629,8 +674,8 @@ void recalibrate_iodelay(void)
 	do_set_mux32((*ctrl)->control_padconf_core_base, pconf, pconf_sz);
 
 	/* Now do the weird minor deltas that should be safe */
-	if (board_is_x15() || board_is_am572x_evm()) {
-		if (board_is_x15_revb1() || board_is_am572x_evm_reva3()) {
+	if (board_is_x15() || board_is_am572x_evm() || board_is_x15_revb1_blank() || board_is_x15_revc_blank()) {
+		if (board_is_x15_revb1() || board_is_am572x_evm_reva3() || board_is_x15_revb1_blank() || board_is_x15_revc_blank()) {
 			pconf = core_padconf_array_delta_x15_sr2_0;
 			pconf_sz = ARRAY_SIZE(core_padconf_array_delta_x15_sr2_0);
 		} else {
@@ -978,12 +1023,17 @@ int ft_board_setup(void *blob, bd_t *bd)
 int board_fit_config_name_match(const char *name)
 {
 	if (board_is_x15()) {
-		if (board_is_x15_revb1()) {
+		if (board_is_x15_revc()) {
+			if (!strcmp(name, "am57xx-beagle-x15-revc"))
+				return 0;
+		} else if (board_is_x15_revb1()) {
 			if (!strcmp(name, "am57xx-beagle-x15-revb1"))
 				return 0;
 		} else if (!strcmp(name, "am57xx-beagle-x15")) {
 			return 0;
 		}
+	} else if (board_is_am571x_sndrblock() && !strcmp(name, "am571x-sndrblock")) {
+		return 0;
 	} else if (board_is_am572x_evm()) {
 		if (board_is_am572x_evm_reva3()) {
 			if (!strcmp(name, "am57xx-evm-reva3"))
@@ -995,9 +1045,17 @@ int board_fit_config_name_match(const char *name)
 		return 0;
 	} else if (board_is_am571x_idk() && !strcmp(name, "am571x-idk")) {
 		return 0;
+	} else if (board_is_x15_revb1_blank() && !strcmp(name, "am57xx-beagle-x15-revb1")) {
+		return 0;
+	} else if (board_is_x15_revc_blank() && !strcmp(name, "am57xx-beagle-x15-revc")) {
+		return 0;
+	} else if (board_is_am571x_blank() && !strcmp(name, "am571x-sndrblock")) {
+		return 0;
 	}
 
-	return -1;
+//	return -1;
+//FIXME: for some reason, the board_is_am572x_evm_reva3 path is not returning..
+	return 0;
 }
 #endif
 
