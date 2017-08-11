@@ -73,11 +73,19 @@
 	"bootpart=0:2\0" \
 	"bootdir=/boot\0" \
 	"bootfile=zImage\0" \
+	"board_eeprom_header=undefined\0" \
 	"usbtty=cdc_acm\0" \
 	"vram=16M\0" \
 	"partitions=" PARTS_DEFAULT "\0" \
 	"optargs=\0" \
 	"dofastboot=0\0" \
+	"read_board_eeprom="\
+		"if test $board_eeprom_header = beagle_x15_revb1_blank; then " \
+			"run eeprom_dump; run eeprom_x15_b1; reset; fi; " \
+		"if test $board_eeprom_header = beagle_x15_revc_blank; then " \
+			"run eeprom_dump; run eeprom_x15_c; reset; fi; " \
+		"if test $board_eeprom_header = am571x_sndrblock_blank; then " \
+			"run eeprom_dump; run eeprom_sndrblock; reset; fi;  \0" \
 	"findfdt="\
 		"if test $board_name = omap5_uevm; then " \
 			"setenv fdtfile omap5-uevm.dtb; fi; " \
@@ -93,6 +101,8 @@
 			"setenv fdtfile am57xx-beagle-x15.dtb; fi;" \
 		"if test $board_name = beagle_x15_revb1; then " \
 			"setenv fdtfile am57xx-beagle-x15-revb1.dtb; fi;" \
+		"if test $board_name = beagle_x15_revc; then " \
+			"setenv fdtfile am57xx-beagle-x15-revc.dtb; fi;" \
 		"if test $board_name = am572x_idk && test $idk_lcd = no; then " \
 			"setenv fdtfile am572x-idk.dtb; fi;" \
 		"if test $board_name = am572x_idk && test $idk_lcd = osd101t2045; then " \
@@ -109,28 +119,30 @@
 			"setenv fdtfile am571x-idk-lcd-osd101t2045.dtb; fi;" \
 		"if test $board_name = am571x_idk && test $idk_lcd = osd101t2587; then " \
 			"setenv fdtfile am571x-idk-lcd-osd101t2587.dtb; fi;" \
+		"if test $board_name = am571x_sndrblock; then " \
+			"setenv fdtfile am571x-sndrblock.dtb; fi;" \
 		"if test $fdtfile = undefined; then " \
 			"echo WARNING: Could not determine device tree to use; fi; \0" \
+	EEWIKI_USB_BOOT \
+	EEWIKI_SCSI_BOOT \
+	EEWIKI_MMC_BOOT \
+	EEWIKI_UNAME_BOOT \
+	EEPROM_PROGRAMMING \
 	DFUARGS \
 	NETARGS \
 
 #define CONFIG_BOOTCOMMAND \
-	"if test ${dofastboot} -eq 1; then " \
-		"echo Boot fastboot requested, resetting dofastboot ...;" \
-		"setenv dofastboot 0; saveenv;" \
-		"echo Booting into fastboot ...; " \
-		"fastboot " __stringify(CONFIG_FASTBOOT_USB_DEV) "; " \
-	"fi;" \
-	"if test ${boot_fit} -eq 1; then "	\
-		"run update_to_fit;"	\
-	"fi;"	\
+	"run read_board_eeprom; " \
 	"run findfdt; " \
-	"run envboot; " \
-	"run mmcboot;" \
+	"setenv mmcdev 0; " \
+	"setenv interface usb; " \
+	"echo usb_boot is currently disabled;" \
+	"setenv interface scsi; " \
+	"echo scsi_boot is currently disabled;" \
+	"setenv interface mmc; " \
+	"run mmc_boot;" \
 	"setenv mmcdev 1; " \
-	"setenv bootpart 1:2; " \
-	"setenv mmcroot /dev/mmcblk0p2 rw; " \
-	"run mmcboot;" \
+	"run mmc_boot;" \
 	""
 
 /*
