@@ -721,14 +721,48 @@ int board_init(void)
 	return 0;
 }
 
+static void initialize_ethaddr(void)
+{
+#if !defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_ETH_SUPPORT)
+	uint8_t mac_addr[6];
+	uint32_t mac_hi, mac_lo;
+
+	if (!env_get("ethaddr")) {
+		/* try reading mac address from efuse */
+		mac_lo = readl(&cdev->macid0l);
+		mac_hi = readl(&cdev->macid0h);
+		mac_addr[0] = mac_hi & 0xFF;
+		mac_addr[1] = (mac_hi & 0xFF00) >> 8;
+		mac_addr[2] = (mac_hi & 0xFF0000) >> 16;
+		mac_addr[3] = (mac_hi & 0xFF000000) >> 24;
+		mac_addr[4] = mac_lo & 0xFF;
+		mac_addr[5] = (mac_lo & 0xFF00) >> 8;
+
+		printf("<ethaddr> not set. Validating first E-fuse MAC\n");
+
+		if (is_valid_ethaddr(mac_addr))
+			eth_env_set_enetaddr("ethaddr", mac_addr);
+	}
+
+	if (!env_get("eth1addr")) {
+		mac_lo = readl(&cdev->macid1l);
+		mac_hi = readl(&cdev->macid1h);
+		mac_addr[0] = mac_hi & 0xFF;
+		mac_addr[1] = (mac_hi & 0xFF00) >> 8;
+		mac_addr[2] = (mac_hi & 0xFF0000) >> 16;
+		mac_addr[3] = (mac_hi & 0xFF000000) >> 24;
+		mac_addr[4] = mac_lo & 0xFF;
+		mac_addr[5] = (mac_lo & 0xFF00) >> 8;
+
+		if (is_valid_ethaddr(mac_addr))
+			eth_env_set_enetaddr("eth1addr", mac_addr);
+	}
+#endif
+}
+
 #ifdef CONFIG_BOARD_LATE_INIT
 int board_late_init(void)
 {
-#if !defined(CONFIG_SPL_BUILD)
-	uint8_t mac_addr[6];
-	uint32_t mac_hi, mac_lo;
-#endif
-
 #ifdef CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
 	char *name = NULL;
 
@@ -780,38 +814,7 @@ int board_late_init(void)
 		env_set("boot_fit", "1");
 #endif
 
-#if !defined(CONFIG_SPL_BUILD)
-	/* try reading mac address from efuse */
-	mac_lo = readl(&cdev->macid0l);
-	mac_hi = readl(&cdev->macid0h);
-	mac_addr[0] = mac_hi & 0xFF;
-	mac_addr[1] = (mac_hi & 0xFF00) >> 8;
-	mac_addr[2] = (mac_hi & 0xFF0000) >> 16;
-	mac_addr[3] = (mac_hi & 0xFF000000) >> 24;
-	mac_addr[4] = mac_lo & 0xFF;
-	mac_addr[5] = (mac_lo & 0xFF00) >> 8;
-
-	if (!env_get("ethaddr")) {
-		printf("<ethaddr> not set. Validating first E-fuse MAC\n");
-
-		if (is_valid_ethaddr(mac_addr))
-			eth_env_set_enetaddr("ethaddr", mac_addr);
-	}
-
-	mac_lo = readl(&cdev->macid1l);
-	mac_hi = readl(&cdev->macid1h);
-	mac_addr[0] = mac_hi & 0xFF;
-	mac_addr[1] = (mac_hi & 0xFF00) >> 8;
-	mac_addr[2] = (mac_hi & 0xFF0000) >> 16;
-	mac_addr[3] = (mac_hi & 0xFF000000) >> 24;
-	mac_addr[4] = mac_lo & 0xFF;
-	mac_addr[5] = (mac_lo & 0xFF00) >> 8;
-
-	if (!env_get("eth1addr")) {
-		if (is_valid_ethaddr(mac_addr))
-			eth_env_set_enetaddr("eth1addr", mac_addr);
-	}
-#endif
+	initialize_ethaddr();
 
 	return 0;
 }
@@ -900,6 +903,7 @@ int board_eth_init(bd_t *bis)
 	mac_addr[5] = (mac_lo & 0xFF00) >> 8;
 #endif
 
+	initialize_ethaddr();
 
 #if (defined(CONFIG_DRIVER_TI_CPSW) && !defined(CONFIG_SPL_BUILD)) || \
 	(defined(CONFIG_SPL_ETH_SUPPORT) && defined(CONFIG_SPL_BUILD))
