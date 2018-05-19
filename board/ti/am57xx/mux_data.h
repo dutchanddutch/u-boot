@@ -206,7 +206,7 @@ const struct pad_conf_entry core_padconf_array_essential_x15[] = {
 	{DCAN1_RX, (M0 | PIN_INPUT | SLEWCONTROL)},	/* dcan1_rx.dcan1_rx */
 	{UART1_RXD, (M0 | PIN_INPUT_PULLUP | SLEWCONTROL)},	/* uart1_rxd.uart1_rxd */
 	{UART1_TXD, (M0 | PIN_OUTPUT | SLEWCONTROL)},	/* uart1_txd.uart1_txd */
-	{UART1_CTSN, (M14 | PIN_INPUT_PULLDOWN)},	/* uart1_ctsn.gpio7_24 */
+	{UART1_CTSN, (M14 | PIN_INPUT_PULLUP)},	/* uart1_ctsn.gpio7_24 */
 	{UART1_RTSN, (M14 | PIN_INPUT)},	/* uart1_rtsn.gpio7_25 */
 	{UART2_RXD, (M14 | PIN_INPUT_PULLDOWN)},	/* uart2_rxd.gpio7_26 */
 	{UART2_TXD, (M14 | PIN_INPUT_PULLDOWN)},	/* uart2_txd.gpio7_27 */
