@@ -208,8 +208,8 @@ const struct pad_conf_entry core_padconf_array_essential_x15[] = {
 	{UART1_TXD, (M0 | PIN_OUTPUT | SLEWCONTROL)},	/* uart1_txd.uart1_txd */
 	{UART1_CTSN, (M14 | PIN_INPUT_PULLUP)},	/* uart1_ctsn.gpio7_24 */
 	{UART1_RTSN, (M14 | PIN_INPUT)},	/* uart1_rtsn.gpio7_25 */
-	{UART2_RXD, (M14 | PIN_INPUT_PULLDOWN)},	/* uart2_rxd.gpio7_26 */
-	{UART2_TXD, (M14 | PIN_INPUT_PULLDOWN)},	/* uart2_txd.gpio7_27 */
+	{UART2_RXD, (M14 | PIN_INPUT_PULLUP)},	/* uart2_rxd.gpio7_26 */
+	{UART2_TXD, (M14 | PIN_INPUT_PULLUP)},	/* uart2_txd.gpio7_27 */
 	{UART2_CTSN, (M2 | PIN_INPUT_PULLUP)},	/* uart2_ctsn.uart3_rxd */
 	{UART2_RTSN, (M1 | PIN_OUTPUT)},	/* uart2_rtsn.uart3_txd */
 	{I2C1_SDA, (M0 | PIN_INPUT_PULLUP)},	/* i2c1_sda.i2c1_sda */
