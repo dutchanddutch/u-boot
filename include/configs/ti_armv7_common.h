@@ -469,7 +469,7 @@
  */
 #define CONFIG_SYS_MALLOC_LEN		SZ_32M
 #ifndef CONFIG_BAUDRATE
-#define CONFIG_BAUDRATE			115200
+#define CONFIG_BAUDRATE			460800
 #endif
 #define CONFIG_ENV_VARS_UBOOT_CONFIG	/* Strongly encouraged */
 #define CONFIG_ENV_OVERWRITE		/* Overwrite ethaddr / serial# */
