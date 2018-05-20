@@ -66,8 +66,21 @@
 	DEFAULT_LINUX_BOOT_ENV \
 	DEFAULT_MMC_TI_ARGS \
 	DEFAULT_FIT_TI_ARGS \
+	"board_eeprom_header=undefined\0" \
+	"read_board_eeprom="\
+		"if test $board_eeprom_header = beagle_x15_revb1_blank; then " \
+			"run eeprom_dump; run eeprom_x15_b1; reset; fi; " \
+		"if test $board_eeprom_header = beagle_x15_revc_blank; then " \
+			"run eeprom_dump; run eeprom_x15_c; reset; fi; " \
+		"if test $board_eeprom_header = am571x_sndrblock_blank; then " \
+			"run eeprom_dump; run eeprom_sndrblock; reset; fi;  \0" \
 	DEFAULT_COMMON_BOOT_TI_ARGS \
 	DEFAULT_FDT_TI_ARGS \
+	EEWIKI_USB_BOOT \
+	EEWIKI_SCSI_BOOT \
+	EEWIKI_MMC_BOOT \
+	EEWIKI_UNAME_BOOT \
+	EEPROM_PROGRAMMING \
 	DFUARGS \
 	NETARGS \
 	NANDARGS \

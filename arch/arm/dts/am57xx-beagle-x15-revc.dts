@@ -9,7 +9,7 @@
 #include "am57xx-beagle-x15-common.dtsi"
 
 / {
-	model = "TI AM5728 BeagleBoard-X15 rev B1";
+	model = "TI AM5728 BeagleBoard-X15 rev C";
 };
 
 &tpd12s015 {

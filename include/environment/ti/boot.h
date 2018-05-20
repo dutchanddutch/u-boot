@@ -95,24 +95,23 @@
 			"setenv fdtfile am571x-idk-lcd-osd101t2045.dtb; fi;" \
 		"if test $board_name = am571x_idk && test $idk_lcd = osd101t2587; then " \
 			"setenv fdtfile am571x-idk-lcd-osd101t2587.dtb; fi;" \
+		"if test $board_name = am571x_sndrblock; then " \
+			"setenv fdtfile am571x-sndrblock.dtb; fi;" \
 		"if test $fdtfile = undefined; then " \
 			"echo WARNING: Could not determine device tree to use; fi; \0" \
 
 #define CONFIG_BOOTCOMMAND \
-	"if test ${dofastboot} -eq 1; then " \
-		"echo Boot fastboot requested, resetting dofastboot ...;" \
-		"setenv dofastboot 0; saveenv;" \
-		"echo Booting into fastboot ...; " \
-		"fastboot " __stringify(CONFIG_FASTBOOT_USB_DEV) "; " \
-	"fi;" \
-	"if test ${boot_fit} -eq 1; then "	\
-		"run update_to_fit;"	\
-	"fi;"	\
+	"run read_board_eeprom; " \
 	"run findfdt; " \
-	"run envboot; " \
-	"run mmcboot;" \
-	"run emmc_linux_boot; " \
-	"run emmc_android_boot; " \
+	"setenv mmcdev 0; " \
+	"setenv interface usb; " \
+	"echo usb_boot is currently disabled;" \
+	"setenv interface scsi; " \
+	"echo scsi_boot is currently disabled;" \
+	"setenv interface mmc; " \
+	"run mmc_boot;" \
+	"setenv mmcdev 1; " \
+	"run mmc_boot;" \
 	""
 
 #endif /* CONFIG_OMAP54XX */
