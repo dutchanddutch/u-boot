@@ -465,13 +465,18 @@
  * function over binary size in the main portion of U-Boot as this is
  * generally easily constrained later if needed.  We enable the config
  * options that give us information in the environment about what board
- * we are on so we do not need to rely on the command prompt.  We set a
- * console baudrate of 115200 and use the default baud rate table.
+ * we are on so we do not need to rely on the command prompt.
  */
 #define CONFIG_SYS_MALLOC_LEN		SZ_32M
+#ifndef CONFIG_BAUDRATE
 #define CONFIG_BAUDRATE			115200
+#endif
 #define CONFIG_ENV_VARS_UBOOT_CONFIG	/* Strongly encouraged */
 #define CONFIG_ENV_OVERWRITE		/* Overwrite ethaddr / serial# */
+#ifndef CONFIG_SYS_BAUDRATE_TABLE
+#define CONFIG_SYS_BAUDRATE_TABLE	{ 9600, 19200, 38400, 57600, 115200, \
+			230400, 460800, 921600, 1843200, 3686400 }
+#endif
 
 /* As stated above, the following choices are optional. */
 #define CONFIG_SYS_LONGHELP
