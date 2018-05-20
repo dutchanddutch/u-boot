@@ -68,7 +68,7 @@
 	DEFAULT_LINUX_BOOT_ENV \
 	DEFAULT_MMC_TI_ARGS \
 	DEFAULT_FIT_TI_ARGS \
-	"console=" CONSOLEDEV ",115200n8\0" \
+	"console=" CONSOLEDEV ",460800n8\0" \
 	"fdtfile=undefined\0" \
 	"bootpart=0:2\0" \
 	"bootdir=/boot\0" \
