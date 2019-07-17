@@ -336,6 +336,46 @@ static int do_fdt(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 			return 1;
 		}
 
+	/*
+	 * Append to the value of a property in the working_fdt.
+	 */
+	} else if (strcmp(argv[1], "append") == 0) {
+		char *pathp;		/* path */
+		char *prop;		/* property */
+		int  nodeoffset;	/* node offset from libfdt */
+		static char data[SCRATCHPAD] __aligned(4);/* property storage */
+		int  len;		/* length of appended data */
+		int  ret;		/* return value */
+
+		/*
+		 * Parameters: Node path, property, value.
+		 */
+		if (argc < 5)
+			return CMD_RET_USAGE;
+
+		pathp  = argv[2];
+		prop   = argv[3];
+
+		nodeoffset = fdt_path_offset (working_fdt, pathp);
+		if (nodeoffset < 0) {
+			/*
+			 * Not found or something else bad happened.
+			 */
+			printf ("libfdt fdt_path_offset() returned %s\n",
+				fdt_strerror(nodeoffset));
+			return 1;
+		}
+
+		ret = fdt_parse_prop(&argv[4], argc - 4, data, &len);
+		if (ret != 0)
+			return ret;
+
+		ret = fdt_appendprop(working_fdt, nodeoffset, prop, data, len);
+		if (ret < 0) {
+			printf ("libfdt fdt_appendprop(): %s\n", fdt_strerror(ret));
+			return 1;
+		}
+
 	/********************************************************************
 	 * Get the value of a property in the working_fdt.
 	 ********************************************************************/
